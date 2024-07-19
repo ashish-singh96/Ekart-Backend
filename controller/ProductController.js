@@ -1,56 +1,70 @@
 import product from "../model/ProductModel.js";
-import {v2 as cloudinary} from 'cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 class ProductController {
-  
+
   static insert_product = async (req, res) => {
     try {
-        const { title, price, category, description } = req.body;
+      const { title, price, category, description } = req.body;
 
-        if (req.files && req.files.image && req.files.otherImages) {
-            const image = req.files.image;
-            const otherImages = Array.isArray(req.files.otherImages) ? req.files.otherImages : [req.files.otherImages];
-            
-            // Upload main image
-            const imageResult = await cloudinary.uploader.upload(image.tempFilePath, {
-                folder: "Ekart/product"
-            });
+      if (req.files && req.files.image && req.files.otherImages) {
+        const image = req.files.image;
+        const otherImages = Array.isArray(req.files.otherImages) ? req.files.otherImages : [req.files.otherImages];
 
-            // Upload other images
-            const otherImageResults = await Promise.all(otherImages.map(async (otherImage) => {
-                const result = await cloudinary.uploader.upload(otherImage.tempFilePath, {
-                    folder: "Ekart/product"
-                });
-                return {
-                    public_id: result.public_id,
-                    url: result.secure_url,
-                };
-            }));
+        // Upload main image
+        const imageResult = await cloudinary.uploader.upload(image.tempFilePath, {
+          folder: "Ekart/product"
+        });
 
-            // Create and save product
-            const data = new product({
-                image: {
-                    public_id: imageResult.public_id,
-                    url: imageResult.secure_url,
-                },
-                otherImages: otherImageResults,
-                title,
-                price,
-                description,
-                category,
-            });
+        // Upload other images
+        const otherImageResults = await Promise.all(otherImages.map(async (otherImage) => {
+          const result = await cloudinary.uploader.upload(otherImage.tempFilePath, {
+            folder: "Ekart/product"
+          });
+          return {
+            public_id: result.public_id,
+            url: result.secure_url,
+          };
+        }));
 
-            await data.save();
-            res.status(200).json({ message: "Data Inserted Successfully!" });
-        } else {
-            res.status(403).json({ message: "Please Check Fields" });
-        }
+        // Create and save product
+        const data = new product({
+          image: {
+            public_id: imageResult.public_id,
+            url: imageResult.secure_url,
+          },
+          otherImages: otherImageResults,
+          title,
+          price,
+          description,
+          category,
+        });
+
+        await data.save();
+        res.status(200).json({ message: "Data Inserted Successfully!" });
+      } else {
+        res.status(403).json({ message: "Please Check Fields" });
+      }
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Internal Server Error!" });
+      console.log(error);
+      res.status(500).json({ message: "Internal Server Error!" });
     }
-}
+  }
 
 
-    
+  static view_product = async (req, res) => {
+    try {
+      const data = await product.find();
+      if(data){
+         res.status(200).json({message: "Data get SuccessFully", data});
+      }else{
+        res.status(403).json({message: "Data not found"});
+      }
+    } catch (error) {
+      res.status(500).json({message: "Internal Server Error"});
+    }
+  }
+
+
+
 }
 export default ProductController;
