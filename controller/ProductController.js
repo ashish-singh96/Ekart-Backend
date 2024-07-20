@@ -1,5 +1,6 @@
 import product from "../model/ProductModel.js";
 import { v2 as cloudinary } from 'cloudinary';
+import objectId from 'objectid';
 class ProductController {
 
   static insert_product = async (req, res) => {
@@ -54,13 +55,28 @@ class ProductController {
   static view_product = async (req, res) => {
     try {
       const data = await product.find();
-      if(data){
-         res.status(200).json({message: "Data get SuccessFully", data});
-      }else{
-        res.status(403).json({message: "Data not found"});
+      if (data) {
+        res.status(200).json({ message: "Data get SuccessFully", data });
+      } else {
+        res.status(403).json({ message: "Data not found" });
       }
     } catch (error) {
-      res.status(500).json({message: "Internal Server Error"});
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+  
+  
+  static edit_product = async (req, res) => {
+    try {
+      const id = req.params.id;
+      if (objectId.isValid(id)) {
+        const data = await product.findById({ _id: id });
+        res.status(200).json({ message: "Data Get Successfully!", data });
+      } else {
+        res.status(403).json({ message: "ID not correct!" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Internal Server Error!" });
     }
   }
 
