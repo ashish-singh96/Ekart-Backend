@@ -65,7 +65,7 @@ class ProductController {
     }
   }
   
-  
+
   static edit_product = async (req, res) => {
     try {
       const id = req.params.id;
@@ -77,6 +77,21 @@ class ProductController {
       }
     } catch (error) {
       res.status(500).json({ message: "Internal Server Error!" });
+    }
+  }
+
+
+  static delete_product = async (req, res) => {
+    try {
+      const id = req.params.id;
+      if(objectId.isValid(id)){
+        await product.findByIdAndDelete({_id:id});
+        res.status(200).json({message:"Data Deleted SuccessFully!"});
+      }else{
+        res.status(403).json({message:"ID not correct!"});
+      }
+    } catch (error) {
+      res.status(500).json({message:"Internal Server Error!"});
     }
   }
 
