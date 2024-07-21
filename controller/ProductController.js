@@ -17,8 +17,8 @@ class ProductController {
         });
 
         // Upload other images
-        const otherImageResults = await Promise.all(otherImages.map(async (otherImage) => {
-          const result = await cloudinary.uploader.upload(otherImage.tempFilePath, {
+        const otherImagesResults = await Promise.all(otherImages.map(async (otherImages) => {
+          const result = await cloudinary.uploader.upload(otherImages.tempFilePath, {
             folder: "Ekart/product"
           });
           return {
@@ -33,7 +33,7 @@ class ProductController {
             public_id: imageResult.public_id,
             url: imageResult.secure_url,
           },
-          otherImages: otherImageResults,
+          otherImages: otherImagesResults,
           title,
           price,
           description,
@@ -64,7 +64,7 @@ class ProductController {
       res.status(500).json({ message: "Internal Server Error" });
     }
   }
-  
+
 
   static edit_product = async (req, res) => {
     try {
@@ -81,17 +81,90 @@ class ProductController {
   }
 
 
+  static update_product = async (req, res) => {
+    try {
+      const { title, price, category, description } = req.body;
+      const id = req.params.id;
+      if (objectId.isValid(id)) {
+        if (req.files) {
+          if (req.files.image && req.files.otherImages) {
+            const image = req.files.image;
+            const imageResult = await cloudinary.uploader.upload(
+              image.tempFilePath,
+              {
+                folder: "Ekart/product"
+              }
+            );
+
+            const otherImages = req.files.otherImages;
+            const other = [];
+
+            if (otherImages.length >= 2) {
+              for (let i = 0; i < otherImages.length; i++) {
+                const otherImagesResults = await cloudinary.uploader.upload(
+                  otherImages[i].tempFilePath,
+                  {
+                    folder: "Ekart/product"
+                  }
+                )
+                other.push({
+                  public_id: otherImagesResults.public_id,
+                  url: otherImagesResults.secure_url,
+                })
+              }
+            } else {
+              const otherImagesResults = await cloudinary.uploader.upload(
+                otherImages.tempFilePath,
+                {
+                  folder: "Ekart/product"
+                }
+              );
+              other.push({
+                public_id: otherImagesResults.public_id,
+                url: otherImagesResults.secure_url,
+              })
+            }
+
+            const data = await product.findByIdAndUpdate({_id:id},
+              {
+                image: {
+                  public_id: imageResult.public_id,
+                  url: imageResult.secure_url
+                },
+                otherImages: other,
+                title: title,
+                price: price,
+                description: description,
+                category: category,
+              }
+            )
+            await data.save();
+            res.status(200).json({ message: "Data Update Successfully!" });
+
+          }
+        } else {
+          res.status(403).json({ message: "Empty Fields!" });
+        }
+      } else {
+        res.status(403).json({ message: "ID not correct!" });
+      }
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({ message: "Internal Server Error!" });
+    }
+  }
+
   static delete_product = async (req, res) => {
     try {
       const id = req.params.id;
-      if(objectId.isValid(id)){
-        await product.findByIdAndDelete({_id:id});
-        res.status(200).json({message:"Data Deleted SuccessFully!"});
-      }else{
-        res.status(403).json({message:"ID not correct!"});
+      if (objectId.isValid(id)) {
+        await product.findByIdAndDelete({ _id: id });
+        res.status(200).json({ message: "Data Deleted SuccessFully!" });
+      } else {
+        res.status(403).json({ message: "ID not correct!" });
       }
     } catch (error) {
-      res.status(500).json({message:"Internal Server Error!"});
+      res.status(500).json({ message: "Internal Server Error!" });
     }
   }
 
