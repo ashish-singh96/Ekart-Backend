@@ -14,4 +14,6 @@ routes.delete('/delete_product/:id', ProductController.delete_product);
 
 //Register routing
 routes.post('/register', SignUpController.register);
+routes.post('/login', SignUpController.login);
+
 export default routes;
