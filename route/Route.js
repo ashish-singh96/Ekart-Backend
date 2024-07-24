@@ -1,6 +1,7 @@
 import express from 'express';
 import ProductController from '../controller/ProductController.js';
 import SignUpController from '../controller/SignUpController.js';
+import EnquiryFormController from '../controller/EnquiryFormController.js';
 
 
 const routes = express.Router();
@@ -15,5 +16,9 @@ routes.delete('/delete_product/:id', ProductController.delete_product);
 //Register routing
 routes.post('/register', SignUpController.register);
 routes.post('/login', SignUpController.login);
+
+
+//Enquiry Form
+routes.post('/enquiry', EnquiryFormController.insert_enquiry)
 
 export default routes;
