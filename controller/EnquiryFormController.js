@@ -36,5 +36,20 @@ class EnquiryFormController {
             res.status(500).json({ message: "Internal Server Error!" });
         }
     };
+
+    static get_enquiry = async (req, res) => {
+        try {
+            const data = await enquiry.find();
+            if(data){
+               return res.status(200).json({message:"Data get successfully!",data});
+            }else{
+                res.status(400).json({message:"Data not found!"});
+            }
+        } catch (error) {
+           res.status(500).json({message:"Internal Server Error!"}); 
+        }
+    }
+
+    
 }
 export default EnquiryFormController;

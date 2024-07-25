@@ -19,6 +19,7 @@ routes.post('/login', SignUpController.login);
 
 
 //Enquiry Form
-routes.post('/enquiry', EnquiryFormController.insert_enquiry)
+routes.post('/enquiry', EnquiryFormController.insert_enquiry);
+routes.get('/get_enquiry', EnquiryFormController.get_enquiry);
 
 export default routes;
