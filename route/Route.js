@@ -17,7 +17,7 @@ routes.delete('/delete_product/:id', ProductController.delete_product);
 routes.post('/register', SignUpController.register);
 routes.post('/login', SignUpController.login);
 routes.post('/logout', SignUpController.logout);
-
+routes.post('/forget_password', SignUpController.forget);
 
 //Enquiry Form
 routes.post('/enquiry', EnquiryFormController.insert_enquiry);

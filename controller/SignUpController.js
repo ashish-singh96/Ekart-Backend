@@ -58,26 +58,26 @@ class SignUpController {
     static login = async (req, res) => {
         try {
             const { email, password } = req.body;
-            
+
             if (!email || !password) {
                 return res.status(403).json({ message: "Please fill all details!" });
             }
-    
+
             const user = await signup.findOne({ email });
-    
+
             if (!user) {
                 return res.status(403).json({ message: "User not registered!" });
             }
-    
+
             const passwordMatch = await bcrypt.compare(password, user.password);
-    
+
             if (passwordMatch) {
                 const token = jwt.sign(
                     { userId: user._id, email: user.email },
                     secretKey,
                     { expiresIn: '1h' }
                 );
-    
+
                 return res.status(200).json({ message: "Login Successfully!", token });
             } else {
                 return res.status(403).json({ message: "Password didn't match" });
@@ -88,20 +88,41 @@ class SignUpController {
         }
     }
 
-
-
     static logout = async (req, res) => {
         try {
             res.clearCookie('token');
-            res.status(200).json({message:"Logout Successfully!"});
+            res.status(200).json({ message: "Logout Successfully!" });
         } catch (error) {
             console.log(error);
-            res.status(500).json({message:"Internal Server Error!"});
+            res.status(500).json({ message: "Internal Server Error!" });
         }
     }
-    
 
-    
+
+    static forget = async (req, res) => {
+        try {
+            const { email } = req.body;
+            const user = await signup.findOne({ email });
+            if (!user) {
+                return res.status(404).json({ message: "User not found!" });
+            }
+            // Generate token
+            const token = generateToken();
+            // Update user's reset token
+            await signup.findByIdAndUpdate(user._id, { token });
+            // Send reset email
+            try {
+                await sendResetEmail(email, token);
+                return res.status(200).json({ message: "Password reset link sent to your registered email id" });
+            } catch (emailError) {
+                console.error(emailError);
+                return res.status(500).json({ message: "Failed to send reset email" });
+            }
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: "Internal Server Error!" });
+        }
+    }
 
 
 };
