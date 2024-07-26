@@ -16,6 +16,7 @@ routes.delete('/delete_product/:id', ProductController.delete_product);
 //Register routing
 routes.post('/register', SignUpController.register);
 routes.post('/login', SignUpController.login);
+routes.post('/logout', SignUpController.logout);
 
 
 //Enquiry Form
